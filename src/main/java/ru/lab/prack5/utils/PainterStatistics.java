@@ -9,26 +9,27 @@ import ru.lab.prack5.entities.StatisticNode;
 import ru.lab.prack5.entities.Statistics;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 public class PainterStatistics {
-    private final XYChart empiricalDistribution;
-    private final XYChart poligon;
+    private final XYChart empirical;
+    private final XYChart polygon;
     private final XYChart histogram;
 
     public PainterStatistics() {
-        empiricalDistribution = new XYChartBuilder().width(600).height(400).title("График эмпирической функции распределения").xAxisTitle("x").yAxisTitle("F(x)").build();
-        empiricalDistribution.getStyler().setChartTitleVisible(false);
-        empiricalDistribution.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
-        empiricalDistribution.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
-        empiricalDistribution.getStyler().setMarkerSize(5);
+        empirical = new XYChartBuilder().width(600).height(400).title("График эмпирической функции распределения").xAxisTitle("x").yAxisTitle("F(x)").build();
+        empirical.getStyler().setChartTitleVisible(false);
+        empirical.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
+        empirical.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
+        empirical.getStyler().setMarkerSize(5);
 
-        poligon = new XYChartBuilder().width(600).height(400).title("Полигон частот").xAxisTitle("x").yAxisTitle("p").build();
-        poligon.getStyler().setChartTitleVisible(false);
-        poligon.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
-        poligon.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
-        poligon.getStyler().setMarkerSize(5);
+        polygon = new XYChartBuilder().width(600).height(400).title("Полигон частот").xAxisTitle("x").yAxisTitle("p").build();
+        polygon.getStyler().setChartTitleVisible(false);
+        polygon.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
+        polygon.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
+        polygon.getStyler().setMarkerSize(5);
 
         histogram = new XYChartBuilder().width(600).height(400).title("Гистограмма частот").xAxisTitle("ч").yAxisTitle("p/h").build();
         histogram.getStyler().setChartTitleVisible(false);
@@ -38,31 +39,103 @@ public class PainterStatistics {
     }
 
     public void drawGraphs(Statistics statistics) {
-
-        poligon.addSeries("Полигон", getXFromSet(statistics.getStatisticalDistribution()), getYFromSet(statistics.getStatisticalDistribution()));
-
+        empirical.addSeries("График эмпирической\nфункции распределения", getXEmpirical(statistics.getEmpiricalDistribution()), getYEmpirical(statistics.getEmpiricalDistribution()));
+        polygon.addSeries("Полигон частот", getXPolygon(statistics.getStatisticalDistribution()), getYPolygon(statistics.getStatisticalDistribution()));
+        histogram.addSeries("Гистограмма частот", getXHistogram(statistics), getYHistogram(statistics));
         openGraphs();
     }
 
-    private List<Double> getXFromSet(Set<StatisticNode> set) {
+    private List<Double> getXEmpirical(Set<StatisticNode> empiricalDistribution) {
         ArrayList<Double> pointsX = new ArrayList<>();
-        for (StatisticNode statisticNode : set) {
+        int counter = 1;
+        for (StatisticNode statisticNode : empiricalDistribution) {
+            pointsX.add(statisticNode.getValue());
+            if (counter < empiricalDistribution.size()) {
+                pointsX.add(statisticNode.getValue());
+            }
+            counter++;
+        }
+        return pointsX;
+    }
+
+    private List<Double> getYEmpirical(Set<StatisticNode> empiricalDistribution) {
+        ArrayList<Double> pointsY = new ArrayList<>();
+        Iterator<StatisticNode> iterator = empiricalDistribution.iterator();
+        Double previous = iterator.next().getProbability();
+        while (iterator.hasNext()) {
+            pointsY.add(previous);
+            Double probability = iterator.next().getProbability();
+            pointsY.add(probability);
+            previous = probability;
+        }
+        pointsY.add(previous);
+        return pointsY;
+    }
+
+    private List<Double> getXPolygon(Set<StatisticNode> statisticalDistribution) {
+        ArrayList<Double> pointsX = new ArrayList<>();
+        for (StatisticNode statisticNode : statisticalDistribution) {
             pointsX.add(statisticNode.getValue());
         }
         return pointsX;
     }
 
-    private List<Double> getYFromSet(Set<StatisticNode> set) {
+    private List<Double> getYPolygon(Set<StatisticNode> statisticalDistribution) {
         ArrayList<Double> pointsY = new ArrayList<>();
-        for (StatisticNode statisticNode : set) {
+        for (StatisticNode statisticNode : statisticalDistribution) {
             pointsY.add(statisticNode.getProbability());
         }
         return pointsY;
     }
 
+    private List<Double> getXHistogram(Statistics statistics) {
+        ArrayList<Double> pointsX = new ArrayList<>();
+        Double h = statistics.getSweep() / Math.floor(1 + Math.log10(statistics.getStatisticalDistribution().size()) / Math.log10(2.0));
+        Double startInterval = statistics.getStatisticalDistribution().iterator().next().getValue();
+        for (StatisticNode statisticNode : statistics.getStatisticalDistribution()) {
+            if (statisticNode.getValue() - startInterval >= h) {
+                pointsX.add(startInterval);
+                pointsX.add(startInterval);
+                pointsX.add(startInterval + h);
+                pointsX.add(startInterval + h);
+                startInterval = startInterval + h;
+            }
+        }
+        pointsX.add(startInterval);
+        pointsX.add(startInterval);
+        pointsX.add(startInterval + h);
+        pointsX.add(startInterval + h);
+        return pointsX;
+    }
+
+    private List<Double> getYHistogram(Statistics statistics) {
+        ArrayList<Double> pointsY = new ArrayList<>();
+        Double h = statistics.getSweep() / Math.floor(1 + Math.log10(statistics.getStatisticalDistribution().size()) / Math.log10(2.0));
+        Double startInterval = statistics.getStatisticalDistribution().iterator().next().getValue();
+        Double probability = 0.0;
+        for (StatisticNode statisticNode : statistics.getStatisticalDistribution()) {
+            if (statisticNode.getValue() - startInterval >= h) {
+                pointsY.add(0.0);
+                pointsY.add(probability / h);
+                pointsY.add(probability / h);
+                pointsY.add(0.0);
+                startInterval = startInterval + h;
+                probability = statisticNode.getProbability();
+            } else {
+                probability += statisticNode.getProbability();
+            }
+        }
+        pointsY.add(0.0);
+        pointsY.add(probability / h);
+        pointsY.add(probability / h);
+        pointsY.add(0.0);
+        return pointsY;
+    }
+
+
     private void openGraphs() {
-        new SwingWrapper(empiricalDistribution).displayChart();
-        new SwingWrapper(poligon).displayChart();
+        new SwingWrapper(empirical).displayChart();
+        new SwingWrapper(polygon).displayChart();
         new SwingWrapper(histogram).displayChart();
     }
 }

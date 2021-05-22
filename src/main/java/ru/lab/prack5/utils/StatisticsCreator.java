@@ -14,7 +14,7 @@ public class StatisticsCreator {
         statistics.setVariationRange(variationRange);
         statistics.setMinValue(variationRange.get(0));
         statistics.setMaxValue(variationRange.get(variationRange.size() - 1));
-        statistics.setSweep(statistics.getMaxValue() - statistics.getMinValue()); //todo отрицательный?
+        statistics.setSweep(statistics.getMaxValue() - statistics.getMinValue());
 
         Set<StatisticNode> statisticalDistribution = getStatisticalDistribution(selection);
         statistics.setStatisticalDistribution(statisticalDistribution);
