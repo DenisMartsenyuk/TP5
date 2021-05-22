@@ -1,4 +1,5 @@
 import ru.lab.prack5.entities.Statistics;
+import ru.lab.prack5.utils.PainterStatistics;
 import ru.lab.prack5.utils.PrinterStatistics;
 import ru.lab.prack5.utils.ReaderSelection;
 import ru.lab.prack5.utils.StatisticsCreator;
@@ -19,5 +20,7 @@ public class Application {
     public void start() {
         Statistics statistics = statisticsCreator.getStatistics(readerSelection.readSelection());
         PrinterStatistics.printStatistics(statistics);
+        PainterStatistics painterStatistics = new PainterStatistics();
+        painterStatistics.drawGraphs(statistics);
     }
 }
