@@ -9,10 +9,19 @@ public class Statistics {
     private Double minValue; //минимальное значение
     private Double maxValue; //максимальное значение
     private Double sweep; //размах
-    private Double mathExpectation; //мат. ожидание
-    private Double standardDeviation; //среднеквадратическое отклонение
     private Set<StatisticNode> statisticalDistribution; //статистическое распределение
+    private Double mathExpectation; //мат. ожидание
+    private Double dispersion;
+    private Double standardDeviation; //среднеквадратическое отклонение
     private Set<StatisticNode> empiricalDistribution; //эмпирическое распределение
+
+    public Double getDispersion() {
+        return dispersion;
+    }
+
+    public void setDispersion(Double dispersion) {
+        this.dispersion = dispersion;
+    }
 
     public List<Double> getSelection() {
         return selection;

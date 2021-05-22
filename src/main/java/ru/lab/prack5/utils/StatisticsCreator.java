@@ -19,11 +19,9 @@ public class StatisticsCreator {
         Set<StatisticNode> statisticalDistribution = getStatisticalDistribution(selection);
         statistics.setStatisticalDistribution(statisticalDistribution);
         statistics.setMathExpectation(getMathExpectation(statisticalDistribution));
+        statistics.setDispersion(getDispersion(statisticalDistribution));
         statistics.setStandardDeviation(getStandardDeviation(statisticalDistribution));
-
-
-
-
+        statistics.setEmpiricalDistribution(getEmpiricalDistribution(statisticalDistribution));
 
         return statistics;
     }
@@ -75,10 +73,24 @@ public class StatisticsCreator {
         Set<StatisticNode> empiricalDistribution = new TreeSet<>();
 
         Double probability = 0.0;
+        Double previous = 0.0;
+        Double step = 0.0;
+        boolean flag = true;
         for (StatisticNode statisticNode : statisticalDistribution) {
             empiricalDistribution.add(new StatisticNode(statisticNode.getValue(), probability));
             probability += statisticNode.getProbability();
-        } //todo добавить еще
+
+            if (flag) {
+                previous = statisticNode.getValue();
+                flag = false;
+                continue;
+            }
+            if (Math.abs(previous - statisticNode.getValue()) > step) {
+                step = Math.abs(previous - statisticNode.getValue());
+            }
+            previous = statisticNode.getValue();
+        }
+        empiricalDistribution.add(new StatisticNode(previous + step, probability));
         return empiricalDistribution;
     }
 }
