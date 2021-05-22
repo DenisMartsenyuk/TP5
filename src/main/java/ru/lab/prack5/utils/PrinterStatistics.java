@@ -12,7 +12,7 @@ public class PrinterStatistics {
     private static void printList(List<Double> list, String name) {
         System.out.println(name + ": ");
         for (Double element : list) {
-            
+
         }
     }
 }
