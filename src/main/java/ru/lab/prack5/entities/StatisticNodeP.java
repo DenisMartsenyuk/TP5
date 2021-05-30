@@ -1,10 +1,10 @@
 package ru.lab.prack5.entities;
 
-public class StatisticNode implements Comparable <StatisticNode>{
+public class StatisticNodeP implements Comparable <StatisticNodeP>{
     private Double value;
     private Double probability;
 
-    public StatisticNode(Double value, Double probability) {
+    public StatisticNodeP(Double value, Double probability) {
         this.value = value;
         this.probability = probability;
     }
@@ -18,7 +18,7 @@ public class StatisticNode implements Comparable <StatisticNode>{
     }
 
     @Override
-    public int compareTo(StatisticNode o) {
+    public int compareTo(StatisticNodeP o) {
         return this.value.compareTo(o.value);
     }
 }

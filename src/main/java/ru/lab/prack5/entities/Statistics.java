@@ -9,11 +9,11 @@ public class Statistics {
     private Double minValue; //минимальное значение
     private Double maxValue; //максимальное значение
     private Double sweep; //размах
-    private Set<StatisticNode> statisticalDistribution; //статистическое распределение
+    private Set<StatisticNodeN> statisticalDistribution; //статистическое распределение
     private Double mathExpectation; //мат. ожидание
     private Double dispersion;
     private Double standardDeviation; //среднеквадратическое отклонение
-    private Set<StatisticNode> empiricalDistribution; //эмпирическое распределение
+    private Set<StatisticNodeP> empiricalDistribution; //эмпирическое распределение
     private Set<IntervalNode> intervalDistribution; //интервальный ряд
 
     public Set<IntervalNode> getIntervalDistribution() {
@@ -88,19 +88,19 @@ public class Statistics {
         this.standardDeviation = standardDeviation;
     }
 
-    public Set<StatisticNode> getStatisticalDistribution() {
+    public Set<StatisticNodeN> getStatisticalDistribution() {
         return statisticalDistribution;
     }
 
-    public void setStatisticalDistribution(Set<StatisticNode> statisticalDistribution) {
+    public void setStatisticalDistribution(Set<StatisticNodeN> statisticalDistribution) {
         this.statisticalDistribution = statisticalDistribution;
     }
 
-    public Set<StatisticNode> getEmpiricalDistribution() {
+    public Set<StatisticNodeP> getEmpiricalDistribution() {
         return empiricalDistribution;
     }
 
-    public void setEmpiricalDistribution(Set<StatisticNode> empiricalDistribution) {
+    public void setEmpiricalDistribution(Set<StatisticNodeP> empiricalDistribution) {
         this.empiricalDistribution = empiricalDistribution;
     }
 }

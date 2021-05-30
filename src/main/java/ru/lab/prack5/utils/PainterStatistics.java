@@ -6,7 +6,7 @@ import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
 import org.knowm.xchart.style.Styler;
 import ru.lab.prack5.entities.IntervalNode;
-import ru.lab.prack5.entities.StatisticNode;
+import ru.lab.prack5.entities.StatisticNodeP;
 import ru.lab.prack5.entities.Statistics;
 
 import java.util.ArrayList;
@@ -26,13 +26,13 @@ public class PainterStatistics {
         empirical.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
         empirical.getStyler().setMarkerSize(5);
 
-        polygon = new XYChartBuilder().width(600).height(400).title("Полигон частот").xAxisTitle("x").yAxisTitle("p").build();
+        polygon = new XYChartBuilder().width(600).height(400).title("Полигон частот").xAxisTitle("x").yAxisTitle("n").build();
         polygon.getStyler().setChartTitleVisible(false);
         polygon.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
         polygon.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
         polygon.getStyler().setMarkerSize(5);
 
-        histogram = new XYChartBuilder().width(600).height(400).title("Гистограмма частот").xAxisTitle("ч").yAxisTitle("p/h").build();
+        histogram = new XYChartBuilder().width(600).height(400).title("Гистограмма частот").xAxisTitle("ч").yAxisTitle("n/h").build();
         histogram.getStyler().setChartTitleVisible(false);
         histogram.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
         histogram.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
@@ -46,22 +46,22 @@ public class PainterStatistics {
         openGraphs();
     }
 
-    private List<Double> getXEmpirical(Set<StatisticNode> empiricalDistribution) {
+    private List<Double> getXEmpirical(Set<StatisticNodeP> empiricalDistribution) {
         ArrayList<Double> pointsX = new ArrayList<>();
         int counter = 1;
-        for (StatisticNode statisticNode : empiricalDistribution) {
-            pointsX.add(statisticNode.getValue());
+        for (StatisticNodeP statisticNodeP : empiricalDistribution) {
+            pointsX.add(statisticNodeP.getValue());
             if (counter < empiricalDistribution.size()) {
-                pointsX.add(statisticNode.getValue());
+                pointsX.add(statisticNodeP.getValue());
             }
             counter++;
         }
         return pointsX;
     }
 
-    private List<Double> getYEmpirical(Set<StatisticNode> empiricalDistribution) {
+    private List<Double> getYEmpirical(Set<StatisticNodeP> empiricalDistribution) {
         ArrayList<Double> pointsY = new ArrayList<>();
-        Iterator<StatisticNode> iterator = empiricalDistribution.iterator();
+        Iterator<StatisticNodeP> iterator = empiricalDistribution.iterator();
         Double previous = iterator.next().getProbability();
         while (iterator.hasNext()) {
             pointsY.add(previous);
@@ -84,52 +84,31 @@ public class PainterStatistics {
     private List<Double> getYPolygon(Statistics statistics) {
         ArrayList<Double> pointsY = new ArrayList<>();
         for (IntervalNode intervalNode : statistics.getIntervalDistribution()) {
-            pointsY.add(intervalNode.getProbability());
+            pointsY.add(Double.valueOf(intervalNode.getQuantity()));
         }
         return pointsY;
     }
 
     private List<Double> getXHistogram(Statistics statistics) {
         ArrayList<Double> pointsX = new ArrayList<>();
-        Double h = statistics.getSweep() / Math.floor(1 + Math.log10(statistics.getStatisticalDistribution().size()) / Math.log10(2.0));
-        Double startInterval = statistics.getStatisticalDistribution().iterator().next().getValue();
-        for (StatisticNode statisticNode : statistics.getStatisticalDistribution()) {
-            if (statisticNode.getValue() - startInterval >= h) {
-                pointsX.add(startInterval);
-                pointsX.add(startInterval);
-                pointsX.add(startInterval + h);
-                pointsX.add(startInterval + h);
-                startInterval = startInterval + h;
-            }
+        for (IntervalNode intervalNode : statistics.getIntervalDistribution()) {
+            pointsX.add(intervalNode.getLeft());
+            pointsX.add(intervalNode.getLeft());
+            pointsX.add(intervalNode.getRight());
+            pointsX.add(intervalNode.getRight());
         }
-        pointsX.add(startInterval);
-        pointsX.add(startInterval);
-        pointsX.add(startInterval + h);
-        pointsX.add(startInterval + h);
         return pointsX;
     }
 
     private List<Double> getYHistogram(Statistics statistics) {
         ArrayList<Double> pointsY = new ArrayList<>();
-        Double h = statistics.getSweep() / Math.floor(1 + Math.log10(statistics.getStatisticalDistribution().size()) / Math.log10(2.0));
-        Double startInterval = statistics.getStatisticalDistribution().iterator().next().getValue();
-        Double probability = 0.0;
-        for (StatisticNode statisticNode : statistics.getStatisticalDistribution()) {
-            if (statisticNode.getValue() - startInterval >= h) {
-                pointsY.add(0.0);
-                pointsY.add(probability / h);
-                pointsY.add(probability / h);
-                pointsY.add(0.0);
-                startInterval = startInterval + h;
-                probability = statisticNode.getProbability();
-            } else {
-                probability += statisticNode.getProbability();
-            }
+        Double h = statistics.getIntervalDistribution().iterator().next().getRight() - statistics.getIntervalDistribution().iterator().next().getLeft();
+        for (IntervalNode intervalNode : statistics.getIntervalDistribution()) {
+            pointsY.add(0.0);
+            pointsY.add(intervalNode.getQuantity() * 1.0 / h);
+            pointsY.add(intervalNode.getQuantity() * 1.0 / h);
+            pointsY.add(0.0);
         }
-        pointsY.add(0.0);
-        pointsY.add(probability / h);
-        pointsY.add(probability / h);
-        pointsY.add(0.0);
         return pointsY;
     }
 

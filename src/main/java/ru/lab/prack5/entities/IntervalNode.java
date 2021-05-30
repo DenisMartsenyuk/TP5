@@ -3,7 +3,7 @@ package ru.lab.prack5.entities;
 public class IntervalNode implements Comparable <IntervalNode> {
     private Double left;
     private Double right;
-    private Double probability;
+    private Integer quantity;
 
     public Double getLeft() {
         return left;
@@ -21,12 +21,12 @@ public class IntervalNode implements Comparable <IntervalNode> {
         this.right = right;
     }
 
-    public Double getProbability() {
-        return probability;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setProbability(Double probability) {
-        this.probability = probability;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 
     @Override

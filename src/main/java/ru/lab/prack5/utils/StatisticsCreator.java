@@ -1,7 +1,8 @@
 package ru.lab.prack5.utils;
 
 import ru.lab.prack5.entities.IntervalNode;
-import ru.lab.prack5.entities.StatisticNode;
+import ru.lab.prack5.entities.StatisticNodeN;
+import ru.lab.prack5.entities.StatisticNodeP;
 import ru.lab.prack5.entities.Statistics;
 
 import java.util.*;
@@ -17,39 +18,39 @@ public class StatisticsCreator {
         statistics.setMaxValue(variationRange.get(variationRange.size() - 1));
         statistics.setSweep(statistics.getMaxValue() - statistics.getMinValue());
 
-        Set<StatisticNode> statisticalDistribution = getStatisticalDistribution(selection);
+        Set<StatisticNodeN> statisticalDistribution = getStatisticalDistribution(selection);
         statistics.setStatisticalDistribution(statisticalDistribution);
-        statistics.setMathExpectation(getMathExpectation(statisticalDistribution));
-        statistics.setDispersion(getDispersion(statisticalDistribution));
-        statistics.setStandardDeviation(getStandardDeviation(statisticalDistribution));
-        statistics.setEmpiricalDistribution(getEmpiricalDistribution(statisticalDistribution));
+        statistics.setMathExpectation(getMathExpectation(statisticalDistribution, selection.size()));
+        statistics.setDispersion(getDispersion(statisticalDistribution, selection.size()));
+        statistics.setStandardDeviation(getStandardDeviation(statisticalDistribution, selection.size()));
+        statistics.setEmpiricalDistribution(getEmpiricalDistribution(statisticalDistribution, selection.size()));
         statistics.setIntervalDistribution(getIntervalDistribution(statisticalDistribution, statistics.getSweep()));
 
         return statistics;
     }
 
-    private Set<IntervalNode>  getIntervalDistribution(Set<StatisticNode> statisticalDistribution, Double sweep) {
+    private Set<IntervalNode>  getIntervalDistribution(Set<StatisticNodeN> statisticalDistribution, Double sweep) {
         Set<IntervalNode> intervalDistribution = new TreeSet<>();
-        Double h = sweep / Math.floor(1 + Math.log10(statisticalDistribution.size()) / Math.log10(2.0));
-        Double startInterval = statisticalDistribution.iterator().next().getValue();
-        Double probability = 0.0;
-        for (StatisticNode statisticNode : statisticalDistribution) {
-            if (statisticNode.getValue() - startInterval >= h) {
+        Double h = sweep / Math.round(1 + Math.log10(statisticalDistribution.size()) / Math.log10(2.0));
+        Double startInterval = statisticalDistribution.iterator().next().getValue() - h / 2;
+        Integer quantity = 0;
+        for (StatisticNodeN statisticNodeN : statisticalDistribution) {
+            if (statisticNodeN.getValue() - startInterval >= h) {
                 IntervalNode intervalNode = new IntervalNode();
                 intervalNode.setLeft(startInterval);
                 intervalNode.setRight(startInterval + h);
-                intervalNode.setProbability(probability / h);
+                intervalNode.setQuantity(quantity);
                 intervalDistribution.add(intervalNode);
-                probability = statisticNode.getProbability();
+                quantity = statisticNodeN.getQuantity();
                 startInterval = startInterval + h;
             } else {
-                probability += statisticNode.getProbability();
+                quantity += statisticNodeN.getQuantity();
             }
         }
         IntervalNode intervalNode = new IntervalNode();
         intervalNode.setLeft(startInterval);
         intervalNode.setRight(startInterval + h);
-        intervalNode.setProbability(probability / h);
+        intervalNode.setQuantity(quantity);
         intervalDistribution.add(intervalNode);
         return intervalDistribution;
     }
@@ -60,8 +61,8 @@ public class StatisticsCreator {
         return variationRange;
     }
 
-    private Set<StatisticNode> getStatisticalDistribution(List<Double> selection) {
-        Set<StatisticNode> statisticalDistribution = new TreeSet<>();
+    private Set<StatisticNodeN> getStatisticalDistribution(List<Double> selection) {
+        Set<StatisticNodeN> statisticalDistribution = new TreeSet<>();
         for (Double node : selection) {
             Integer quantity = 0;
             for (Double comparableNode : selection) {
@@ -69,56 +70,55 @@ public class StatisticsCreator {
                     quantity++;
                 }
             }
-            Double probability = quantity * 1.0 / selection.size();
-            statisticalDistribution.add(new StatisticNode(node, probability));
+            statisticalDistribution.add(new StatisticNodeN(node, quantity));
         }
 
         return statisticalDistribution;
     }
 
-    private Double getMathExpectation(Set<StatisticNode> statisticalDistribution) {
+    private Double getMathExpectation(Set<StatisticNodeN> statisticalDistribution, Integer selectionSize) {
         Double mathExpectation = 0.0;
-        for (StatisticNode statisticNode : statisticalDistribution) {
-            mathExpectation += statisticNode.getValue() * statisticNode.getProbability();
+        for (StatisticNodeN statisticNodeN : statisticalDistribution) {
+            mathExpectation += statisticNodeN.getValue() * (statisticNodeN.getQuantity() * 1.0 / selectionSize);
         }
         return mathExpectation;
     }
 
-    private Double getDispersion(Set<StatisticNode> statisticalDistribution) {
-        Double mathExpectation = getMathExpectation(statisticalDistribution);
+    private Double getDispersion(Set<StatisticNodeN> statisticalDistribution, Integer selectionSize) {
+        Double mathExpectation = getMathExpectation(statisticalDistribution, selectionSize);
         Double mathExpectationSquare = 0.0;
-        for (StatisticNode statisticNode : statisticalDistribution) {
-            mathExpectationSquare +=  statisticNode.getValue() * statisticNode.getValue() * statisticNode.getProbability();
+        for (StatisticNodeN statisticNodeN : statisticalDistribution) {
+            mathExpectationSquare +=  statisticNodeN.getValue() * statisticNodeN.getValue() * (statisticNodeN.getQuantity() * 1.0 / selectionSize);
         }
         return mathExpectationSquare - mathExpectation * mathExpectation;
     }
 
-    private Double getStandardDeviation(Set<StatisticNode> statisticalDistribution) {
-        return Math.sqrt(getDispersion(statisticalDistribution));
+    private Double getStandardDeviation(Set<StatisticNodeN> statisticalDistribution, Integer selectionSize) {
+        return Math.sqrt(getDispersion(statisticalDistribution, selectionSize));
     }
 
-    private Set<StatisticNode> getEmpiricalDistribution(Set<StatisticNode> statisticalDistribution) {
-        Set<StatisticNode> empiricalDistribution = new TreeSet<>();
+    private Set<StatisticNodeP> getEmpiricalDistribution(Set<StatisticNodeN> statisticalDistribution, Integer selectionSize) {
+        Set<StatisticNodeP> empiricalDistribution = new TreeSet<>();
 
-        Double probability = 0.0;
+        Integer quantity = 0;
         Double previous = 0.0;
         Double step = 0.0;
         boolean flag = true;
-        for (StatisticNode statisticNode : statisticalDistribution) {
-            empiricalDistribution.add(new StatisticNode(statisticNode.getValue(), probability));
-            probability += statisticNode.getProbability();
+        for (StatisticNodeN statisticNodeN : statisticalDistribution) {
+            empiricalDistribution.add(new StatisticNodeP(statisticNodeN.getValue(), quantity * 1.0 / selectionSize));
+            quantity += statisticNodeN.getQuantity();
 
             if (flag) {
-                previous = statisticNode.getValue();
+                previous = statisticNodeN.getValue();
                 flag = false;
                 continue;
             }
-            if (Math.abs(previous - statisticNode.getValue()) > step) {
-                step = Math.abs(previous - statisticNode.getValue());
+            if (Math.abs(previous - statisticNodeN.getValue()) > step) {
+                step = Math.abs(previous - statisticNodeN.getValue());
             }
-            previous = statisticNode.getValue();
+            previous = statisticNodeN.getValue();
         }
-        empiricalDistribution.add(new StatisticNode(previous + step, probability));
+        empiricalDistribution.add(new StatisticNodeP(previous + step, quantity * 1.0 / selectionSize));
         return empiricalDistribution;
     }
 }
