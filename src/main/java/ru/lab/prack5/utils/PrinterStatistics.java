@@ -23,7 +23,7 @@ public class PrinterStatistics {
         printDoubleField(statistics.getDispersion(), "Дисперсия");
         printDoubleField(statistics.getStandardDeviation(), "Среднеквадратическое отклонение");
         printStatisticNodesP(statistics.getEmpiricalDistribution(), "Эмпирическое распределение");
-        printIntervalNodes(statistics.getIntervalDistribution(), "Интервальный ряд частностей");
+        printIntervalNodes(statistics.getIntervalDistribution(), "Интервальный ряд частот");
     }
 
     private static void printIntervalNodes(Set<IntervalNode> intervalNodes, String name) {

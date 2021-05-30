@@ -32,7 +32,7 @@ public class PainterStatistics {
         polygon.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
         polygon.getStyler().setMarkerSize(5);
 
-        histogram = new XYChartBuilder().width(600).height(400).title("Гистограмма частот").xAxisTitle("ч").yAxisTitle("n/h").build();
+        histogram = new XYChartBuilder().width(600).height(400).title("Гистограмма частот").xAxisTitle("x").yAxisTitle("n/h").build();
         histogram.getStyler().setChartTitleVisible(false);
         histogram.getStyler().setLegendPosition(Styler.LegendPosition.OutsideE);
         histogram.getStyler().setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
@@ -41,8 +41,8 @@ public class PainterStatistics {
 
     public void drawGraphs(Statistics statistics) {
         empirical.addSeries("График эмпирической\nфункции распределения", getXEmpirical(statistics.getEmpiricalDistribution()), getYEmpirical(statistics.getEmpiricalDistribution()));
-        polygon.addSeries("Полигон частностей", getXPolygon(statistics), getYPolygon(statistics));
-        histogram.addSeries("Гистограмма частностей", getXHistogram(statistics), getYHistogram(statistics));
+        polygon.addSeries("Полигон частот", getXPolygon(statistics), getYPolygon(statistics));
+        histogram.addSeries("Гистограмма частот", getXHistogram(statistics), getYHistogram(statistics));
         openGraphs();
     }
 
