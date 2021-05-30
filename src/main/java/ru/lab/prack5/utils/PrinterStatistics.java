@@ -1,5 +1,6 @@
 package ru.lab.prack5.utils;
 
+import ru.lab.prack5.entities.IntervalNode;
 import ru.lab.prack5.entities.StatisticNode;
 import ru.lab.prack5.entities.Statistics;
 
@@ -20,6 +21,22 @@ public class PrinterStatistics {
         printDoubleField(statistics.getDispersion(), "Дисперсия", FORMAT);
         printDoubleField(statistics.getStandardDeviation(), "Среднеквадратическое отклонение", FORMAT);
         printSet(statistics.getEmpiricalDistribution(), "Эмпирическое распределение", FORMAT);
+        printInterval(statistics.getIntervalDistribution(), "Интервальный ряд частностей", FORMAT);
+    }
+
+    private static void printInterval(Set<IntervalNode> intervalNodes, String name, String format) {
+        System.out.println(name + ": ");
+        for (IntervalNode intervalNode : intervalNodes) {
+            System.out.printf(format, intervalNode.getLeft());
+        }
+        System.out.println();
+        for (IntervalNode intervalNode : intervalNodes) {
+            System.out.printf(format, intervalNode.getRight());
+        }
+        System.out.println();
+        for (IntervalNode intervalNode : intervalNodes) {
+            System.out.printf(format, intervalNode.getProbability());
+        }
     }
 
     private static void printDoubleField(Double field, String name, String format) {

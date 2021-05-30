@@ -1,5 +1,6 @@
 package ru.lab.prack5.utils;
 
+import ru.lab.prack5.entities.IntervalNode;
 import ru.lab.prack5.entities.StatisticNode;
 import ru.lab.prack5.entities.Statistics;
 
@@ -22,8 +23,35 @@ public class StatisticsCreator {
         statistics.setDispersion(getDispersion(statisticalDistribution));
         statistics.setStandardDeviation(getStandardDeviation(statisticalDistribution));
         statistics.setEmpiricalDistribution(getEmpiricalDistribution(statisticalDistribution));
+        statistics.setIntervalDistribution(getIntervalDistribution(statisticalDistribution, statistics.getSweep()));
 
         return statistics;
+    }
+
+    private Set<IntervalNode>  getIntervalDistribution(Set<StatisticNode> statisticalDistribution, Double sweep) {
+        Set<IntervalNode> intervalDistribution = new TreeSet<>();
+        Double h = sweep / Math.floor(1 + Math.log10(statisticalDistribution.size()) / Math.log10(2.0));
+        Double startInterval = statisticalDistribution.iterator().next().getValue();
+        Double probability = 0.0;
+        for (StatisticNode statisticNode : statisticalDistribution) {
+            if (statisticNode.getValue() - startInterval >= h) {
+                IntervalNode intervalNode = new IntervalNode();
+                intervalNode.setLeft(startInterval);
+                intervalNode.setRight(startInterval + h);
+                intervalNode.setProbability(probability / h);
+                intervalDistribution.add(intervalNode);
+                probability = statisticNode.getProbability();
+                startInterval = startInterval + h;
+            } else {
+                probability += statisticNode.getProbability();
+            }
+        }
+        IntervalNode intervalNode = new IntervalNode();
+        intervalNode.setLeft(startInterval);
+        intervalNode.setRight(startInterval + h);
+        intervalNode.setProbability(probability / h);
+        intervalDistribution.add(intervalNode);
+        return intervalDistribution;
     }
 
     private List<Double> getVariationRange(List<Double> selection) {

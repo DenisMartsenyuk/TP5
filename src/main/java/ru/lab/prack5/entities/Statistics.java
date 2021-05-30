@@ -14,6 +14,15 @@ public class Statistics {
     private Double dispersion;
     private Double standardDeviation; //среднеквадратическое отклонение
     private Set<StatisticNode> empiricalDistribution; //эмпирическое распределение
+    private Set<IntervalNode> intervalDistribution; //интервальный ряд
+
+    public Set<IntervalNode> getIntervalDistribution() {
+        return intervalDistribution;
+    }
+
+    public void setIntervalDistribution(Set<IntervalNode> intervalDistribution) {
+        this.intervalDistribution = intervalDistribution;
+    }
 
     public Double getDispersion() {
         return dispersion;

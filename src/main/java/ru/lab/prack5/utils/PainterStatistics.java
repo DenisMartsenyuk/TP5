@@ -5,6 +5,7 @@ import org.knowm.xchart.XYChart;
 import org.knowm.xchart.XYChartBuilder;
 import org.knowm.xchart.XYSeries;
 import org.knowm.xchart.style.Styler;
+import ru.lab.prack5.entities.IntervalNode;
 import ru.lab.prack5.entities.StatisticNode;
 import ru.lab.prack5.entities.Statistics;
 
@@ -40,8 +41,8 @@ public class PainterStatistics {
 
     public void drawGraphs(Statistics statistics) {
         empirical.addSeries("График эмпирической\nфункции распределения", getXEmpirical(statistics.getEmpiricalDistribution()), getYEmpirical(statistics.getEmpiricalDistribution()));
-        polygon.addSeries("Полигон частот", getXPolygon(statistics.getStatisticalDistribution()), getYPolygon(statistics.getStatisticalDistribution()));
-        histogram.addSeries("Гистограмма частот", getXHistogram(statistics), getYHistogram(statistics));
+        polygon.addSeries("Полигон частностей", getXPolygon(statistics), getYPolygon(statistics));
+        histogram.addSeries("Гистограмма частностей", getXHistogram(statistics), getYHistogram(statistics));
         openGraphs();
     }
 
@@ -72,18 +73,18 @@ public class PainterStatistics {
         return pointsY;
     }
 
-    private List<Double> getXPolygon(Set<StatisticNode> statisticalDistribution) {
+    private List<Double> getXPolygon(Statistics statistics) {
         ArrayList<Double> pointsX = new ArrayList<>();
-        for (StatisticNode statisticNode : statisticalDistribution) {
-            pointsX.add(statisticNode.getValue());
+        for (IntervalNode intervalNode : statistics.getIntervalDistribution()) {
+            pointsX.add((intervalNode.getRight() + intervalNode.getLeft()) / 2);
         }
         return pointsX;
     }
 
-    private List<Double> getYPolygon(Set<StatisticNode> statisticalDistribution) {
+    private List<Double> getYPolygon(Statistics statistics) {
         ArrayList<Double> pointsY = new ArrayList<>();
-        for (StatisticNode statisticNode : statisticalDistribution) {
-            pointsY.add(statisticNode.getProbability());
+        for (IntervalNode intervalNode : statistics.getIntervalDistribution()) {
+            pointsY.add(intervalNode.getProbability());
         }
         return pointsY;
     }
